@@ -1,0 +1,206 @@
+{
+  "museum": {
+    "name": "Virtual Art Museum",
+    "tagline": "A walk-through collection of contemporary paintings"
+  },
+  "artworks": [
+    {
+      "id": "p000",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture000.jpg",
+      "title": "Composition I",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.40, "height": 0.50 },
+      "description": "",
+      "wall": "north"
+    },
+    {
+      "id": "p001",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture001.jpg",
+      "title": "Composition II",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.40, "height": 0.50 },
+      "description": "",
+      "wall": "north"
+    },
+    {
+      "id": "p002",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture002.jpg",
+      "title": "Study in Grey",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on panel",
+      "dimensions": { "width": 0.235, "height": 0.295 },
+      "description": "",
+      "wall": "north"
+    },
+    {
+      "id": "p003",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture003.jpg",
+      "title": "Vertical Form",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.295, "height": 0.415 },
+      "description": "",
+      "wall": "north"
+    },
+    {
+      "id": "p004",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture004.jpg",
+      "title": "Horizontal Study",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.39, "height": 0.30 },
+      "description": "",
+      "wall": "north"
+    },
+    {
+      "id": "p005",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture005.jpg",
+      "title": "Blue Figure",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.505, "height": 0.74 },
+      "description": "",
+      "wall": "east"
+    },
+    {
+      "id": "p006",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture006.jpg",
+      "title": "Small Landscape",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on panel",
+      "dimensions": { "width": 0.30, "height": 0.40 },
+      "description": "",
+      "wall": "east"
+    },
+    {
+      "id": "p007",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture007.jpg",
+      "title": "Narrow Portrait",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.208, "height": 0.60 },
+      "description": "",
+      "wall": "east"
+    },
+    {
+      "id": "p008",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture008.jpg",
+      "title": "Wide Format",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.37, "height": 0.27 },
+      "description": "",
+      "wall": "east"
+    },
+    {
+      "id": "p009",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture009.jpg",
+      "title": "Evening Study",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.295, "height": 0.370 },
+      "description": "",
+      "wall": "south"
+    },
+    {
+      "id": "p010",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture010.jpg",
+      "title": "Open Field",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.50, "height": 0.40 },
+      "description": "",
+      "wall": "south"
+    },
+    {
+      "id": "p011",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture011.jpg",
+      "title": "Inner Space",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.395, "height": 0.495 },
+      "description": "",
+      "wall": "south"
+    },
+    {
+      "id": "p012",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture012.jpg",
+      "title": "Warm Palette",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.495, "height": 0.40 },
+      "description": "",
+      "wall": "south"
+    },
+    {
+      "id": "p013",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture013.jpg",
+      "title": "Dark Tones",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on panel",
+      "dimensions": { "width": 0.30, "height": 0.40 },
+      "description": "",
+      "wall": "south"
+    },
+    {
+      "id": "p014",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture014.jpg",
+      "title": "Stillness",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.295, "height": 0.395 },
+      "description": "",
+      "wall": "west"
+    },
+    {
+      "id": "p015",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture015.jpg",
+      "title": "Small Study",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on panel",
+      "dimensions": { "width": 0.193, "height": 0.273 },
+      "description": "",
+      "wall": "west"
+    },
+    {
+      "id": "p016",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture016.jpg",
+      "title": "Rhythm",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.27, "height": 0.375 },
+      "description": "",
+      "wall": "west"
+    },
+    {
+      "id": "p017",
+      "file": "https://raw.githubusercontent.com/kheinz57/theartgame/main/assets/th/picture017.jpg",
+      "title": "Landscape Fragment",
+      "artist": "H. Keinz",
+      "year": "",
+      "medium": "Oil on canvas",
+      "dimensions": { "width": 0.392, "height": 0.297 },
+      "description": "",
+      "wall": "west"
+    }
+  ]
+}
