@@ -21,9 +21,7 @@ artworks/
 Measure (or look up) the physical painting size in **metres**.  
 A 40 × 50 cm canvas = `width: 0.40, height: 0.50`.
 
-The app automatically scales all paintings so the longest side is
-between **1.05 m and 2.40 m** in the 3-D scene, preserving the
-original aspect ratio.
+The app preserves the **relative proportions** of all paintings by using a global scale factor (defined in `js/ArtworkLoader.js`). This ensures that a large mural correctly appears much bigger than a small sketch, exactly as specified by their physical dimensions.
 
 ### 3 – Add an entry to `manifest.json`
 

@@ -18,21 +18,17 @@
  */
 
 const ArtworkLoader = (() => {
-
   /* ── Scale physical metres → display metres ──────────────
-   * Longest side clamped to [MIN_LONG … MAX_LONG].
+   * Preserves relative dimensions from metadata.
+   * Adjust GLOBAL_SCALE to change the overall size of all paintings.
    */
-  const MIN_LONG = 1.05;   // metres in 3-D scene
-  const MAX_LONG = 2.40;
+  const GLOBAL_SCALE = 3.2;
 
   function computeDisplaySize(dims) {
-    let dw = dims.width;
-    let dh = dims.height;
-    const longest = Math.max(dw, dh);
-    let scale = 1;
-    if (longest < MIN_LONG) scale = MIN_LONG / longest;
-    if (longest > MAX_LONG) scale = MAX_LONG / longest;
-    return { dw: dw * scale, dh: dh * scale };
+    return {
+      dw: dims.width * GLOBAL_SCALE,
+      dh: dims.height * GLOBAL_SCALE,
+    };
   }
 
   /* ── Load a single texture ────────────────────────────── */
@@ -44,7 +40,7 @@ const ArtworkLoader = (() => {
       }
 
       const loader = new THREE.TextureLoader();
-      loader.crossOrigin = 'anonymous';
+      loader.crossOrigin = "anonymous";
 
       loader.load(
         url,
@@ -55,8 +51,10 @@ const ArtworkLoader = (() => {
         undefined,
         () => {
           console.warn(`Could not load "${url}" – using placeholder.`);
-          resolve(TextureFactory.createPlaceholderPainting(fallbackSeed, dw, dh));
-        }
+          resolve(
+            TextureFactory.createPlaceholderPainting(fallbackSeed, dw, dh),
+          );
+        },
       );
     });
   }
@@ -70,19 +68,19 @@ const ArtworkLoader = (() => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       manifest = await res.json();
     } catch (err) {
-      console.error('manifest.json could not be loaded:', err);
-      manifest = { museum: { name: 'Virtual Art Museum' }, artworks: [] };
+      console.error("manifest.json could not be loaded:", err);
+      manifest = { museum: { name: "Virtual Art Museum" }, artworks: [] };
     }
 
     const artworks = manifest.artworks || [];
-    const total    = artworks.length;
+    const total = artworks.length;
 
     for (let i = 0; i < total; i++) {
       const art = artworks[i];
 
       /* Compute 3-D display dimensions */
       const { dw, dh } = computeDisplaySize(
-        art.dimensions || { width: 0.40, height: 0.50 }
+        art.dimensions || { width: 0.4, height: 0.5 },
       );
       art._dw = dw;
       art._dh = dh;
