@@ -38,7 +38,6 @@ class Museum {
   build() {
     this._buildStructure();
     this._addAmbientLight();
-    this._addTrackLights();
     this._placeAllArtworks();
   }
 
@@ -72,7 +71,7 @@ class Museum {
     const ceil = new THREE.Mesh(
       new THREE.PlaneGeometry(W, D),
       new THREE.MeshStandardMaterial({
-        color: 0xf6f5f1,
+        color: 0xf0f0f0,
         roughness: 1,
         metalness: 0,
       }),
@@ -81,10 +80,22 @@ class Museum {
     ceil.position.y = H;
     this.scene.add(ceil);
 
+    /* ── Ceiling Structure (Concrete Beams) ─────────────── */
+    const beamMat = new THREE.MeshStandardMaterial({ color: 0xcecece });
+    for (let i = 0; i < 8; i++) {
+      const bz = -D / 2 + (i + 0.5) * (D / 8);
+      const beam = new THREE.Mesh(
+        new THREE.BoxGeometry(W, 0.15, 0.25),
+        beamMat,
+      );
+      beam.position.set(0, H - 0.075, bz);
+      this.scene.add(beam);
+    }
+
     /* ── Walls ──────────────────────────────────────────── */
     const wallMat = new THREE.MeshStandardMaterial({
-      color: 0xeeeae4,
-      roughness: 0.98,
+      color: 0xbcbcbc, // Mid-light gray
+      roughness: 0.9,
       metalness: 0,
     });
 
@@ -179,70 +190,9 @@ class Museum {
      ══════════════════════════════════════════════════════════ */
 
   _addAmbientLight() {
-    this.scene.add(new THREE.AmbientLight(0xfff8f0, 0.5));
-    this.scene.add(new THREE.HemisphereLight(0xfff5e8, 0x1c1000, 0.28));
-  }
-
-  _addTrackLights() {
-    const { RW: W, RD: D, RH: H } = this;
-    const trackY = H - 0.02;
-    const trackLen = D * 0.84;
-    const trackXs = [-W * 0.3, 0, W * 0.3];
-
-    const railMat = new THREE.MeshStandardMaterial({
-      color: 0x0a0a0a,
-      roughness: 0.5,
-    });
-    const bulbMat = new THREE.MeshStandardMaterial({
-      color: 0xffcc44,
-      emissive: 0xffaa22,
-      emissiveIntensity: 2.8,
-    });
-
-    trackXs.forEach((tx) => {
-      /* Rail */
-      const rail = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.014, 0.014, trackLen, 6),
-        railMat,
-      );
-      rail.position.set(tx, trackY, 0);
-      this.scene.add(rail);
-
-      /* Four lights per track */
-      const N = 4;
-      for (let i = 0; i < N; i++) {
-        const frac = (i + 0.5) / N - 0.5;
-        const tz = frac * trackLen;
-        const ly = trackY - 0.11;
-
-        /* Visible bulb cone */
-        const bulb = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.032, 0.088, 0.2, 8),
-          bulbMat,
-        );
-        bulb.rotation.x = Math.PI;
-        bulb.position.set(tx, ly, tz);
-        this.scene.add(bulb);
-
-        /* SpotLight – only centre track casts shadows */
-        const spot = new THREE.SpotLight(
-          0xffe4b0,
-          2.6,
-          9,
-          Math.PI / 6.5,
-          0.42,
-          1.5,
-        );
-        spot.position.set(tx, ly, tz);
-        spot.target.position.set(tx, 0, tz);
-        spot.castShadow = tx === 0 && (i === 1 || i === 2);
-        if (spot.castShadow) {
-          spot.shadow.mapSize.set(512, 512);
-          spot.shadow.bias = -0.001;
-        }
-        this.scene.add(spot, spot.target);
-      }
-    });
+    // Increased intensity to prevent black screen if GPU light limits are hit
+    this.scene.add(new THREE.AmbientLight(0xfff8f0, 0.45));
+    this.scene.add(new THREE.HemisphereLight(0xfff5e8, 0x1c1000, 0.25));
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -468,9 +418,8 @@ class Museum {
     /* ── Wall label (title, artist, dimensions) ─────────── */
     this._buildLabel(art, centerPos, def, h);
 
-    /* Track lights provide the room lighting. Avoid one WebGL spotlight per
-       painting: many spotlights can exceed browser/GPU shader limits and make
-       textures render unreliably on some machines. */
+    /* ── Dedicated painting spotlight ───────────────────── */
+    this._buildPaintingLight(centerPos, def);
   }
 
   /* ── Small engraved-style label below painting ─────────── */
@@ -530,23 +479,37 @@ class Museum {
 
   /* ── Per-painting warm spotlight ────────────────────────── */
   _buildPaintingLight(paintCtr, def) {
-    const FORWARD = 1.55; // how far into room the light sits
-    const LIGHT_Y = this.RH - 0.35;
-
+    const FORWARD = 2.4;
+    const LIGHT_Y = this.RH - 0.2;
     const lPos = paintCtr.clone().add(def.nrm.clone().multiplyScalar(FORWARD));
     lPos.y = LIGHT_Y;
 
-    const spot = new THREE.SpotLight(
-      0xffedd0,
-      3.8,
-      7.5,
-      Math.PI / 10,
-      0.58,
-      2.0,
-    );
+    // Use SpotLight for each picture as requested.
+    // We limit shadow-casting lights to 8 to stay within hardware limits and prevent black screens.
+    const spot = new THREE.SpotLight(0xfff9f0, 2.5, 10, Math.PI / 6, 0.6, 2);
     spot.position.copy(lPos);
     spot.target.position.copy(paintCtr);
-    spot.castShadow = false; // keep draw-call budget low
+
+    // Dynamic limit for shadow-casting lights
+    const currentShadowLights = this.scene.children.filter(
+      (c) => c.isSpotLight && c.castShadow,
+    ).length;
+    if (currentShadowLights < 8) {
+      spot.castShadow = true;
+      spot.shadow.mapSize.set(512, 512);
+      spot.shadow.bias = -0.002;
+    }
+
     this.scene.add(spot, spot.target);
+
+    const fixtureMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
+    const fixture = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.02, 0.05, 0.12),
+      fixtureMat,
+    );
+    fixture.position.copy(lPos);
+    fixture.lookAt(paintCtr);
+    fixture.rotateX(Math.PI / 2);
+    this.scene.add(fixture);
   }
 }

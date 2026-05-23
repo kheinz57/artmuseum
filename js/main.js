@@ -37,13 +37,22 @@ const panelImg = $("panel-img");
    INIT
    ══════════════════════════════════════════════════════════ */
 async function init() {
+  console.log("Museum: Initializing...");
   /* ── Renderer ─────────────────────────────────────────── */
   const canvas = $("museum-canvas");
-  renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    powerPreference: "high-performance",
-  });
+  try {
+    renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      powerPreference: "high-performance",
+    });
+  } catch (e) {
+    console.warn(
+      "Museum: High-performance renderer failed, falling back...",
+      e,
+    );
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+  }
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
@@ -69,19 +78,38 @@ async function init() {
   raycaster.far = 9.5; // examine range in metres
 
   /* ── Load artworks ────────────────────────────────────── */
-  setProgress(0.05, "Loading artwork catalog…");
-  const { artworks } = await ArtworkLoader.load("artworks/manifest.json", (p) =>
-    setProgress(0.05 + p * 0.6, `Loading paintings… ${Math.round(p * 100)}%`),
-  );
+  setProgress(0.05, "Loading artwork catalog...");
+  let artworks = [];
+  try {
+    const result = await ArtworkLoader.load("artworks/manifest.json", (p) =>
+      setProgress(
+        0.05 + p * 0.6,
+        `Loading paintings... ${Math.round(p * 100)}%`,
+      ),
+    );
+    artworks = result.artworks || [];
+    console.log(`Museum: Loaded ${artworks.length} artworks.`);
+  } catch (err) {
+    console.error("Museum: Artwork loading failed:", err);
+  }
 
   /* ── Build museum ─────────────────────────────────────── */
-  setProgress(0.7, "Building gallery…");
-  museum = new Museum(scene, artworks);
-  museum.build();
+  setProgress(0.7, "Building gallery...");
+  try {
+    museum = new Museum(scene, artworks);
+    museum.build();
+    console.log("Museum: Room structure built.");
+  } catch (err) {
+    console.error("Museum: Building failed:", err);
+  }
 
   /* ── Controls ─────────────────────────────────────────── */
-  setProgress(0.9, "Preparing controls…");
-  controls = new FirstPersonControls(camera, renderer.domElement);
+  setProgress(0.9, "Preparing controls...");
+  try {
+    controls = new FirstPersonControls(camera, renderer.domElement);
+  } catch (err) {
+    console.error("Museum: Controls init failed:", err);
+  }
 
   /* PointerLock lost → pause (e.g. user pressed ESC) */
   document.addEventListener("pointerlockchange", () => {
@@ -115,11 +143,13 @@ async function init() {
 /* ══════════════════════════════════════════════════════════
    RENDER LOOP
    ══════════════════════════════════════════════════════════ */
+let frameCount = 0;
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
 
   if (appState === "playing") {
+    if (frameCount++ % 120 === 0) console.log("Museum: Rendering...");
     controls.update(dt, museum.getBounds());
     checkProximity();
   }
@@ -148,10 +178,15 @@ function checkProximity() {
    ══════════════════════════════════════════════════════════ */
 
 function enterGallery() {
+  console.log("Museum: Entering gallery...");
   startScreen.classList.add("hidden");
   hud.classList.remove("hidden");
   appState = "playing";
-  controls.lock();
+  try {
+    controls.lock();
+  } catch (e) {
+    console.warn("Museum: Pointer lock request failed:", e);
+  }
 }
 
 function showPause() {
