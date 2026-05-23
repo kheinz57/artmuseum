@@ -7,84 +7,107 @@
  *                                   inspecting → playing
  */
 
-'use strict';
+"use strict";
 
 /* ── Module globals ────────────────────────────────────── */
 let renderer, scene, camera, clock, raycaster;
 let controls, museum;
 let nearbyArtwork = null;
-let appState = 'loading';   // loading | start | playing | paused | inspecting
+let appState = "loading"; // loading | start | playing | paused | inspecting
+
+let viewerScale = 1;
+let viewerX = 0;
+let viewerY = 0;
+let viewerDragging = false;
+let viewerLastX = 0;
+let viewerLastY = 0;
 
 /* ── Cached DOM references ─────────────────────────────── */
-const $ = id => document.getElementById(id);
-const loadingScreen = $('loading-screen');
-const startScreen   = $('start-screen');
-const pauseScreen   = $('pause-screen');
-const hud           = $('hud');
-const infoPanel     = $('info-panel');
-const examineHint   = $('examine-hint');
+const $ = (id) => document.getElementById(id);
+const loadingScreen = $("loading-screen");
+const startScreen = $("start-screen");
+const pauseScreen = $("pause-screen");
+const hud = $("hud");
+const infoPanel = $("info-panel");
+const examineHint = $("examine-hint");
+const imageViewer = $("image-viewer");
+const panelImg = $("panel-img");
 
 /* ══════════════════════════════════════════════════════════
    INIT
    ══════════════════════════════════════════════════════════ */
 async function init() {
   /* ── Renderer ─────────────────────────────────────────── */
-  const canvas = $('museum-canvas');
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  const canvas = $("museum-canvas");
+  renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    powerPreference: "high-performance",
+  });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
-  renderer.outputEncoding    = THREE.sRGBEncoding;
-  renderer.toneMapping       = THREE.ACESFilmicToneMapping;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
 
   /* ── Scene & camera ───────────────────────────────────── */
-  scene  = new THREE.Scene();
-  scene.background = new THREE.Color(0x0A0A0A);
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0a0a);
 
-  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.05, 80);
-  camera.position.set(0, 1.70, 6.0);   // start near south wall, facing north
+  camera = new THREE.PerspectiveCamera(
+    70,
+    window.innerWidth / window.innerHeight,
+    0.05,
+    80,
+  );
+  camera.position.set(0, 1.7, 6.0); // start near south wall, facing north
 
-  clock     = new THREE.Clock();
+  clock = new THREE.Clock();
   raycaster = new THREE.Raycaster();
-  raycaster.far = 5.5;  // examine range in metres
+  raycaster.far = 9.5; // examine range in metres
 
   /* ── Load artworks ────────────────────────────────────── */
-  setProgress(0.05, 'Loading artwork catalog…');
-  const { artworks } = await ArtworkLoader.load(
-    'artworks/manifest.json',
-    p => setProgress(0.05 + p * 0.60, `Loading paintings… ${Math.round(p * 100)}%`)
+  setProgress(0.05, "Loading artwork catalog…");
+  const { artworks } = await ArtworkLoader.load("artworks/manifest.json", (p) =>
+    setProgress(0.05 + p * 0.6, `Loading paintings… ${Math.round(p * 100)}%`),
   );
 
   /* ── Build museum ─────────────────────────────────────── */
-  setProgress(0.70, 'Building gallery…');
+  setProgress(0.7, "Building gallery…");
   museum = new Museum(scene, artworks);
   museum.build();
 
   /* ── Controls ─────────────────────────────────────────── */
-  setProgress(0.90, 'Preparing controls…');
+  setProgress(0.9, "Preparing controls…");
   controls = new FirstPersonControls(camera, renderer.domElement);
 
   /* PointerLock lost → pause (e.g. user pressed ESC) */
-  document.addEventListener('pointerlockchange', () => {
-    if (!document.pointerLockElement && appState === 'playing') showPause();
+  document.addEventListener("pointerlockchange", () => {
+    if (!document.pointerLockElement && appState === "playing") showPause();
   });
 
   /* ── UI wiring ────────────────────────────────────────── */
-  $('enter-btn').addEventListener('click',  enterGallery);
-  $('resume-btn').addEventListener('click', resumeGallery);
-  $('close-panel').addEventListener('click', closePanel);
-  document.addEventListener('keydown',  onKeyDown);
-  window.addEventListener('resize',     onResize);
+  $("enter-btn").addEventListener("click", enterGallery);
+  $("resume-btn").addEventListener("click", resumeGallery);
+  $("close-panel").addEventListener("click", closePanel);
+  imageViewer.addEventListener("wheel", onViewerWheel, { passive: false });
+  imageViewer.addEventListener("pointerdown", onViewerPointerDown);
+  imageViewer.addEventListener("pointermove", onViewerPointerMove);
+  imageViewer.addEventListener("pointerup", onViewerPointerUp);
+  imageViewer.addEventListener("pointercancel", onViewerPointerUp);
+  imageViewer.addEventListener("dblclick", resetViewerTransform);
+  document.addEventListener("keydown", onKeyDown);
+  window.addEventListener("resize", onResize);
 
   /* ── Ready ────────────────────────────────────────────── */
-  setProgress(1.0, 'Welcome!');
+  setProgress(1.0, "Welcome!");
   await sleep(500);
 
-  loadingScreen.classList.add('hidden');
-  startScreen.classList.remove('hidden');
-  appState = 'start';
+  loadingScreen.classList.add("hidden");
+  startScreen.classList.remove("hidden");
+  appState = "start";
 
   animate();
 }
@@ -96,7 +119,7 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
 
-  if (appState === 'playing') {
+  if (appState === "playing") {
     controls.update(dt, museum.getBounds());
     checkProximity();
   }
@@ -111,12 +134,12 @@ function checkProximity() {
 
   if (hits.length > 0) {
     nearbyArtwork = hits[0].object.userData.artwork;
-    examineHint.classList.remove('hidden');
-    hud.classList.add('near-art');
+    examineHint.classList.remove("hidden");
+    hud.classList.add("near-art");
   } else {
     nearbyArtwork = null;
-    examineHint.classList.add('hidden');
-    hud.classList.remove('near-art');
+    examineHint.classList.add("hidden");
+    hud.classList.remove("near-art");
   }
 }
 
@@ -125,68 +148,69 @@ function checkProximity() {
    ══════════════════════════════════════════════════════════ */
 
 function enterGallery() {
-  startScreen.classList.add('hidden');
-  hud.classList.remove('hidden');
-  appState = 'playing';
+  startScreen.classList.add("hidden");
+  hud.classList.remove("hidden");
+  appState = "playing";
   controls.lock();
 }
 
 function showPause() {
-  appState = 'paused';
-  hud.classList.add('hidden');
-  pauseScreen.classList.remove('hidden');
-  examineHint.classList.add('hidden');
-  hud.classList.remove('near-art');
+  appState = "paused";
+  hud.classList.add("hidden");
+  pauseScreen.classList.remove("hidden");
+  examineHint.classList.add("hidden");
+  hud.classList.remove("near-art");
 }
 
 function resumeGallery() {
-  pauseScreen.classList.add('hidden');
-  hud.classList.remove('hidden');
-  appState = 'playing';
+  pauseScreen.classList.add("hidden");
+  hud.classList.remove("hidden");
+  appState = "playing";
   controls.lock();
 }
 
 function openPanel(art) {
-  appState = 'inspecting';
+  appState = "inspecting";
   controls.unlock();
-  examineHint.classList.add('hidden');
-  hud.classList.remove('near-art');
+  examineHint.classList.add("hidden");
+  hud.classList.remove("near-art");
 
   /* Populate panel */
-  const img = $('panel-img');
+  resetViewerTransform();
+  const img = panelImg;
   if (art.file) {
     img.src = art.file;
-    img.style.display = '';
+    img.style.display = "";
   } else {
-    img.style.display = 'none';
+    img.style.display = "none";
   }
 
-  $('panel-title').textContent  = art.title  || 'Untitled';
-  $('panel-artist').textContent = art.artist || '';
-  $('panel-year').textContent   = art.year   || '';
-  $('panel-medium').textContent = art.medium || '';
+  $("panel-title").textContent = art.title || "Untitled";
+  $("panel-artist").textContent = art.artist || "";
+  $("panel-year").textContent = art.year || "";
+  $("panel-medium").textContent = art.medium || "";
 
   /* Show/hide the dot separator between year and medium */
-  const dot = $('panel-year-dot');
-  dot.style.display = (art.year && art.medium) ? '' : 'none';
+  const dot = $("panel-year-dot");
+  dot.style.display = art.year && art.medium ? "" : "none";
 
   /* Physical dimensions → cm */
-  const d   = art.dimensions || {};
-  const wcm = d.width  ? Math.round(d.width  * 100) : null;
+  const d = art.dimensions || {};
+  const wcm = d.width ? Math.round(d.width * 100) : null;
   const hcm = d.height ? Math.round(d.height * 100) : null;
-  $('panel-dims').textContent = (wcm && hcm) ? `${wcm} × ${hcm} cm` : '';
+  $("panel-dims").textContent = wcm && hcm ? `${wcm} × ${hcm} cm` : "";
 
-  $('panel-desc').textContent   = art.description || '';
+  $("panel-desc").textContent = art.description || "";
 
-  hud.classList.add('hidden');
-  infoPanel.classList.remove('hidden');
+  hud.classList.add("hidden");
+  infoPanel.classList.remove("hidden");
 }
 
 function closePanel() {
-  infoPanel.classList.add('hidden');
-  hud.classList.remove('hidden');
+  infoPanel.classList.add("hidden");
+  hud.classList.remove("hidden");
   nearbyArtwork = null;
-  appState = 'playing';
+  appState = "playing";
   controls.lock();
 }
 
@@ -194,10 +218,11 @@ function closePanel() {
    INPUT
    ══════════════════════════════════════════════════════════ */
 function onKeyDown(e) {
-  if (appState === 'playing' && e.code === 'KeyE' && nearbyArtwork) {
-    openPanel(nearbyArtwork);
+  if (appState === "playing" && e.code === "KeyE") {
+    checkProximity();
+    if (nearbyArtwork) openPanel(nearbyArtwork);
   }
-  if (appState === 'inspecting' && (e.code === 'KeyE' || e.code === 'Escape')) {
+  if (appState === "inspecting" && (e.code === "KeyE" || e.code === "Escape")) {
     closePanel();
   }
 }
@@ -206,8 +231,69 @@ function onKeyDown(e) {
    UTILITIES
    ══════════════════════════════════════════════════════════ */
 function setProgress(frac, text) {
-  $('loading-bar').style.width  = (frac * 100) + '%';
-  $('loading-text').textContent = text;
+  $("loading-bar").style.width = frac * 100 + "%";
+  $("loading-text").textContent = text;
+}
+
+function applyViewerTransform() {
+  panelImg.style.transform = `translate(${viewerX}px, ${viewerY}px) scale(${viewerScale})`;
+}
+
+function resetViewerTransform() {
+  viewerScale = 1;
+  viewerX = 0;
+  viewerY = 0;
+  viewerDragging = false;
+  if (imageViewer) imageViewer.classList.remove("dragging");
+  if (panelImg) applyViewerTransform();
+}
+
+function onViewerWheel(e) {
+  if (appState !== "inspecting") return;
+  e.preventDefault();
+
+  const previous = viewerScale;
+  const factor = e.deltaY < 0 ? 1.14 : 1 / 1.14;
+  viewerScale = Math.max(0.45, Math.min(8, viewerScale * factor));
+
+  /* Keep the point under the cursor roughly stable while zooming. */
+  const rect = imageViewer.getBoundingClientRect();
+  const cx = e.clientX - rect.left - rect.width / 2;
+  const cy = e.clientY - rect.top - rect.height / 2;
+  const ratio = viewerScale / previous;
+  viewerX = cx - (cx - viewerX) * ratio;
+  viewerY = cy - (cy - viewerY) * ratio;
+
+  applyViewerTransform();
+}
+
+function onViewerPointerDown(e) {
+  if (appState !== "inspecting") return;
+  viewerDragging = true;
+  viewerLastX = e.clientX;
+  viewerLastY = e.clientY;
+  imageViewer.classList.add("dragging");
+  imageViewer.setPointerCapture(e.pointerId);
+}
+
+function onViewerPointerMove(e) {
+  if (!viewerDragging || appState !== "inspecting") return;
+  viewerX += e.clientX - viewerLastX;
+  viewerY += e.clientY - viewerLastY;
+  viewerLastX = e.clientX;
+  viewerLastY = e.clientY;
+  applyViewerTransform();
+}
+
+function onViewerPointerUp(e) {
+  viewerDragging = false;
+  imageViewer.classList.remove("dragging");
+  if (
+    imageViewer.hasPointerCapture &&
+    imageViewer.hasPointerCapture(e.pointerId)
+  ) {
+    imageViewer.releasePointerCapture(e.pointerId);
+  }
 }
 
 function onResize() {
@@ -216,10 +302,12 @@ function onResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
 
 /* ── Boot ──────────────────────────────────────────────── */
-init().catch(err => {
-  console.error('Museum init failed:', err);
-  $('loading-text').textContent = 'Error loading – see browser console.';
+init().catch((err) => {
+  console.error("Museum init failed:", err);
+  $("loading-text").textContent = "Error loading – see browser console.";
 });

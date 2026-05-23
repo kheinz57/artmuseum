@@ -1,95 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Art Museum</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-
-  <!-- ── Loading Screen ───────────────────────────────────── -->
-  <div id="loading-screen">
-    <div class="loading-inner">
-      <div class="museum-glyph">🏛</div>
-      <h1>Virtual Art Museum</h1>
-      <div class="progress-track"><div class="progress-fill" id="loading-bar"></div></div>
-      <p id="loading-text">Initializing…</p>
-    </div>
-  </div>
-
-  <!-- ── Welcome Screen ──────────────────────────────────── -->
-  <div id="start-screen" class="screen hidden">
-    <div class="screen-bg"></div>
-    <div class="screen-card">
-      <div class="museum-glyph">🏛</div>
-      <h1>Virtual Art Museum</h1>
-      <p class="tagline">An immersive walk-through gallery</p>
-      <button id="enter-btn" class="primary-btn">Enter Gallery</button>
-      <div class="key-grid">
-        <div class="key-item"><kbd>W A S D</kbd><span>Move</span></div>
-        <div class="key-item"><kbd>Mouse</kbd><span>Look</span></div>
-        <div class="key-item"><kbd>E</kbd><span>Examine</span></div>
-        <div class="key-item"><kbd>Shift</kbd><span>Sprint</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Pause Screen ─────────────────────────────────────── -->
-  <div id="pause-screen" class="screen hidden">
-    <div class="screen-bg"></div>
-    <div class="screen-card small">
-      <h2>— Paused —</h2>
-      <button id="resume-btn" class="primary-btn">Resume</button>
-    </div>
-  </div>
-
-  <!-- ── 3-D Canvas ───────────────────────────────────────── -->
-  <canvas id="museum-canvas"></canvas>
-
-  <!-- ── HUD ─────────────────────────────────────────────── -->
-  <div id="hud" class="hidden">
-    <div id="crosshair">
-      <div class="ch-h"></div>
-      <div class="ch-v"></div>
-    </div>
-    <div id="examine-hint" class="hidden">
-      <kbd>E</kbd>&nbsp; Examine Artwork
-    </div>
-    <div id="room-name">Main Gallery</div>
-  </div>
-
-  <!-- ── Artwork Info Panel ───────────────────────────────── -->
-  <div id="info-panel" class="hidden">
-    <div class="panel-backdrop"></div>
-    <div class="panel-card">
-      <button id="close-panel" aria-label="Close">✕</button>
-      <div class="panel-body">
-        <div class="panel-img-col">
-          <img id="panel-img" src="" alt="Artwork image">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Virtual Art Museum</title>
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+    <body>
+        <!-- ── Loading Screen ───────────────────────────────────── -->
+        <div id="loading-screen">
+            <div class="loading-inner">
+                <div class="museum-glyph">🏛</div>
+                <h1>Virtual Art Museum</h1>
+                <div class="progress-track">
+                    <div class="progress-fill" id="loading-bar"></div>
+                </div>
+                <p id="loading-text">Initializing…</p>
+            </div>
         </div>
-        <div class="panel-text-col">
-          <h2 id="panel-title"></h2>
-          <p  id="panel-artist" class="p-artist"></p>
-          <div class="p-meta">
-            <span id="panel-year"></span><span class="p-dot" id="panel-year-dot">·</span>
-            <span id="panel-medium"></span>
-          </div>
-          <div class="p-meta p-dims">
-            <span id="panel-dims"></span>
-          </div>
-          <p id="panel-desc" class="p-desc"></p>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ── Three.js + App Scripts ───────────────────────────── -->
-  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
-  <script src="js/TextureFactory.js"></script>
-  <script src="js/ArtworkLoader.js"></script>
-  <script src="js/Controls.js"></script>
-  <script src="js/Museum.js"></script>
-  <script src="js/main.js"></script>
-</body>
+        <!-- ── Welcome Screen ──────────────────────────────────── -->
+        <div id="start-screen" class="screen hidden">
+            <div class="screen-bg"></div>
+            <div class="screen-card">
+                <div class="museum-glyph">🏛</div>
+                <h1>Virtual Art Museum</h1>
+                <p class="tagline">An immersive walk-through gallery</p>
+                <button id="enter-btn" class="primary-btn">
+                    Enter Gallery
+                </button>
+                <div class="key-grid">
+                    <div class="key-item">
+                        <kbd>W A S D</kbd><span>Move</span>
+                    </div>
+                    <div class="key-item">
+                        <kbd>Mouse</kbd><span>Look</span>
+                    </div>
+                    <div class="key-item"><kbd>E</kbd><span>Examine</span></div>
+                    <div class="key-item">
+                        <kbd>Shift</kbd><span>Sprint</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Pause Screen ─────────────────────────────────────── -->
+        <div id="pause-screen" class="screen hidden">
+            <div class="screen-bg"></div>
+            <div class="screen-card small">
+                <h2>— Paused —</h2>
+                <button id="resume-btn" class="primary-btn">Resume</button>
+            </div>
+        </div>
+
+        <!-- ── 3-D Canvas ───────────────────────────────────────── -->
+        <canvas id="museum-canvas"></canvas>
+
+        <!-- ── HUD ─────────────────────────────────────────────── -->
+        <div id="hud" class="hidden">
+            <div id="crosshair">
+                <div class="ch-h"></div>
+                <div class="ch-v"></div>
+            </div>
+            <div id="examine-hint" class="hidden">
+                <kbd>E</kbd>&nbsp; Examine Artwork
+            </div>
+            <div id="room-name">Main Gallery</div>
+        </div>
+
+        <!-- ── Artwork Info Panel ───────────────────────────────── -->
+        <div id="info-panel" class="hidden">
+            <div class="panel-backdrop"></div>
+            <div class="panel-card">
+                <button id="close-panel" aria-label="Close">✕</button>
+                <div class="panel-body">
+                    <div class="panel-img-col" id="image-viewer">
+                        <img
+                            id="panel-img"
+                            src=""
+                            alt="Artwork image"
+                            draggable="false"
+                        />
+                        <div class="viewer-help">
+                            Mouse wheel: zoom · Drag: move · E: return
+                        </div>
+                    </div>
+                    <div class="panel-text-col">
+                        <h2 id="panel-title"></h2>
+                        <p id="panel-artist" class="p-artist"></p>
+                        <div class="p-meta">
+                            <span id="panel-year"></span
+                            ><span class="p-dot" id="panel-year-dot">·</span>
+                            <span id="panel-medium"></span>
+                        </div>
+                        <div class="p-meta p-dims">
+                            <span id="panel-dims"></span>
+                        </div>
+                        <p id="panel-desc" class="p-desc"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Three.js + App Scripts ───────────────────────────── -->
+        <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+        <script src="js/TextureFactory.js"></script>
+        <script src="js/ArtworkLoader.js"></script>
+        <script src="js/Controls.js"></script>
+        <script src="js/Museum.js"></script>
+        <script src="js/main.js"></script>
+    </body>
 </html>
