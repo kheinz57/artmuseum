@@ -190,9 +190,9 @@ class Museum {
      ══════════════════════════════════════════════════════════ */
 
   _addAmbientLight() {
-    // Increased intensity to prevent black screen if GPU light limits are hit
-    this.scene.add(new THREE.AmbientLight(0xfff8f0, 0.45));
-    this.scene.add(new THREE.HemisphereLight(0xfff5e8, 0x1c1000, 0.25));
+    // Dimmed ambient light for a more dramatic gallery atmosphere
+    this.scene.add(new THREE.AmbientLight(0xfff8f0, 0.12));
+    this.scene.add(new THREE.HemisphereLight(0xfff5e8, 0x1c1000, 0.08));
   }
 
   /* ══════════════════════════════════════════════════════════
@@ -486,7 +486,8 @@ class Museum {
 
     // Use SpotLight for each picture as requested.
     // We limit shadow-casting lights to 8 to stay within hardware limits and prevent black screens.
-    const spot = new THREE.SpotLight(0xfff9f0, 2.5, 10, Math.PI / 6, 0.6, 2);
+    // Dimmmed intensity for a more focused spotlight look.
+    const spot = new THREE.SpotLight(0xfff9f0, 1.4, 12, Math.PI / 7, 0.5, 2);
     spot.position.copy(lPos);
     spot.target.position.copy(paintCtr);
 

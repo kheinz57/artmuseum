@@ -22,6 +22,8 @@ let viewerDragging = false;
 let viewerLastX = 0;
 let viewerLastY = 0;
 
+let magnifierActive = false;
+
 /* ── Cached DOM references ─────────────────────────────── */
 const $ = (id) => document.getElementById(id);
 const loadingScreen = $("loading-screen");
@@ -32,6 +34,7 @@ const infoPanel = $("info-panel");
 const examineHint = $("examine-hint");
 const imageViewer = $("image-viewer");
 const panelImg = $("panel-img");
+const magnifierLens = $("magnifier-lens");
 
 /* ══════════════════════════════════════════════════════════
    INIT
@@ -126,7 +129,8 @@ async function init() {
   imageViewer.addEventListener("pointerup", onViewerPointerUp);
   imageViewer.addEventListener("pointercancel", onViewerPointerUp);
   imageViewer.addEventListener("dblclick", resetViewerTransform);
-  document.addEventListener("keydown", onKeyDown);
+  imageViewer.addEventListener("contextmenu", (e) => e.preventDefault());
+  document.addEventListener("keydown", onKeyDown, true);
   window.addEventListener("resize", onResize);
 
   /* ── Ready ────────────────────────────────────────────── */
@@ -253,11 +257,20 @@ function closePanel() {
    INPUT
    ══════════════════════════════════════════════════════════ */
 function onKeyDown(e) {
-  if (appState === "playing" && e.code === "KeyE") {
-    checkProximity();
-    if (nearbyArtwork) openPanel(nearbyArtwork);
-  }
-  if (appState === "inspecting" && (e.code === "KeyE" || e.code === "Escape")) {
+  if (e.code === "KeyE") {
+    if (appState === "playing") {
+      checkProximity();
+      if (nearbyArtwork) {
+        e.preventDefault();
+        e.stopPropagation();
+        openPanel(nearbyArtwork);
+      }
+    } else if (appState === "inspecting") {
+      e.preventDefault();
+      e.stopPropagation();
+      closePanel();
+    }
+  } else if (e.code === "Escape" && appState === "inspecting") {
     closePanel();
   }
 }
@@ -279,8 +292,36 @@ function resetViewerTransform() {
   viewerX = 0;
   viewerY = 0;
   viewerDragging = false;
+  magnifierActive = false;
+  if (magnifierLens) magnifierLens.classList.add("hidden");
   if (imageViewer) imageViewer.classList.remove("dragging");
   if (panelImg) applyViewerTransform();
+}
+
+function updateMagnifier(e) {
+  if (!magnifierActive || !panelImg.src) return;
+
+  const rect = imageViewer.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  magnifierLens.style.left = `${x - 130}px`;
+  magnifierLens.style.top = `${y - 130}px`;
+
+  const zoom = 2.5;
+  const imgW = panelImg.offsetWidth * viewerScale;
+  const imgH = panelImg.offsetHeight * viewerScale;
+
+  const imgRect = panelImg.getBoundingClientRect();
+  const relX = (e.clientX - imgRect.left) / viewerScale;
+  const relY = (e.clientY - imgRect.top) / viewerScale;
+
+  const bgX = -relX * zoom + 130 / viewerScale;
+  const bgY = -relY * zoom + 130 / viewerScale;
+
+  magnifierLens.style.backgroundImage = `url('${panelImg.src}')`;
+  magnifierLens.style.backgroundSize = `${panelImg.offsetWidth * zoom}px ${panelImg.offsetHeight * zoom}px`;
+  magnifierLens.style.backgroundPosition = `${bgX * viewerScale}px ${bgY * viewerScale}px`;
 }
 
 function onViewerWheel(e) {
@@ -300,10 +341,23 @@ function onViewerWheel(e) {
   viewerY = cy - (cy - viewerY) * ratio;
 
   applyViewerTransform();
+  if (magnifierActive) updateMagnifier(e);
 }
 
 function onViewerPointerDown(e) {
   if (appState !== "inspecting") return;
+
+  if (e.button === 2 || e.ctrlKey) {
+    magnifierActive = !magnifierActive;
+    if (magnifierActive) {
+      magnifierLens.classList.remove("hidden");
+      updateMagnifier(e);
+    } else {
+      magnifierLens.classList.add("hidden");
+    }
+    return;
+  }
+
   viewerDragging = true;
   viewerLastX = e.clientX;
   viewerLastY = e.clientY;
@@ -312,12 +366,19 @@ function onViewerPointerDown(e) {
 }
 
 function onViewerPointerMove(e) {
-  if (!viewerDragging || appState !== "inspecting") return;
-  viewerX += e.clientX - viewerLastX;
-  viewerY += e.clientY - viewerLastY;
-  viewerLastX = e.clientX;
-  viewerLastY = e.clientY;
-  applyViewerTransform();
+  if (appState !== "inspecting") return;
+
+  if (viewerDragging) {
+    viewerX += e.clientX - viewerLastX;
+    viewerY += e.clientY - viewerLastY;
+    viewerLastX = e.clientX;
+    viewerLastY = e.clientY;
+    applyViewerTransform();
+  }
+
+  if (magnifierActive) {
+    updateMagnifier(e);
+  }
 }
 
 function onViewerPointerUp(e) {
