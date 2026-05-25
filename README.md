@@ -4,7 +4,7 @@ An immersive, first-person 3D walk-through gallery built with Three.js. This app
 
 ## 🚀 Live Demo
 Once hosted on GitHub Pages, your link will look like:
-`https://YOUR_USERNAME.github.io/artmuseum/`
+`https://kheinz57.github.io/artmuseum/`
 
 ## ✨ Features
 - **Immersive 3D Environment:** 20m x 16m gallery room with architectural ceiling beams and realistic lighting.
