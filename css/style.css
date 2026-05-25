@@ -29,6 +29,26 @@ body {
     display: none !important;
 }
 
+.desktop-only {
+    display: block;
+}
+
+.mobile-only {
+    display: none !important;
+}
+
+@media (pointer: coarse), (max-width: 1024px) {
+    .desktop-only {
+        display: none !important;
+    }
+    .mobile-only {
+        display: block !important;
+    }
+    .mobile-only.secondary-btn {
+        display: inline-block !important;
+    }
+}
+
 /* ── Loading Screen ──────────────────────────────────────── */
 #loading-screen {
     position: fixed;
@@ -137,6 +157,14 @@ body {
     font-size: 1.4rem;
 }
 
+.mobile-instructions {
+    color: #999;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-top: -1rem;
+    letter-spacing: 0.02em;
+}
+
 /* ── Button ──────────────────────────────────────────────── */
 .primary-btn {
     display: inline-block;
@@ -157,6 +185,20 @@ body {
 .primary-btn:hover {
     background: #c4964a;
     color: #0a0a0a;
+}
+
+.secondary-btn {
+    padding: 0.5rem 1.2rem;
+    border: 1px solid rgba(196, 150, 74, 0.4);
+    background: rgba(0, 0, 0, 0.5);
+    color: #c4964a;
+    font-family: system-ui, sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 
 /* ── Controls hint grid ──────────────────────────────────── */
@@ -262,6 +304,56 @@ body {
     color: rgba(255, 255, 255, 0.35);
     font-family: system-ui, sans-serif;
     pointer-events: none;
+}
+
+/* ── Mobile Navigation UI ────────────────────────────────── */
+#joystick-zone {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 2.5rem;
+    width: 130px;
+    height: 130px;
+    pointer-events: auto;
+    z-index: 90;
+    touch-action: none;
+}
+
+#joystick-base {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+    );
+    border: 2px solid rgba(196, 150, 74, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+#joystick-knob {
+    width: 54px;
+    height: 54px;
+    background: #c4964a;
+    border: 2px solid rgba(232, 213, 183, 0.5);
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+    transition: transform 0.1s ease-out;
+    opacity: 0.8;
+}
+
+#gyro-btn {
+    position: absolute;
+    bottom: 2.5rem;
+    right: 2.5rem;
+    z-index: 90;
+    pointer-events: auto;
+    border-radius: 4px;
+    font-weight: bold;
+    min-width: 100px;
 }
 
 /* ── Artwork Info Panel ───────────────────────────────────── */

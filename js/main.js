@@ -123,6 +123,25 @@ async function init() {
   $("enter-btn").addEventListener("click", enterGallery);
   $("resume-btn").addEventListener("click", resumeGallery);
   $("close-panel").addEventListener("click", closePanel);
+
+  // Mobile Gyro Toggle
+  const gyroBtn = $("gyro-btn");
+  if (gyroBtn) {
+    gyroBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const active = controls.toggleGyro();
+      gyroBtn.textContent = active ? "Gyro: On" : "Gyro: Off";
+    });
+  }
+
+  // Double-click/tap canvas to examine painting
+  renderer.domElement.addEventListener("dblclick", () => {
+    if (appState === "playing") {
+      checkProximity();
+      if (nearbyArtwork) openPanel(nearbyArtwork);
+    }
+  });
+
   imageViewer.addEventListener("wheel", onViewerWheel, { passive: false });
   imageViewer.addEventListener("pointerdown", onViewerPointerDown);
   imageViewer.addEventListener("pointermove", onViewerPointerMove);

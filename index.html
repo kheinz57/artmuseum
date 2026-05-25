@@ -29,7 +29,7 @@
                 <button id="enter-btn" class="primary-btn">
                     Enter Gallery
                 </button>
-                <div class="key-grid">
+                <div class="key-grid desktop-only">
                     <div class="key-item">
                         <kbd>W A S D</kbd><span>Move</span>
                     </div>
@@ -40,6 +40,10 @@
                     <div class="key-item">
                         <kbd>Shift</kbd><span>Sprint</span>
                     </div>
+                </div>
+                <div class="mobile-only mobile-instructions">
+                    <p>Joystick: Move · Swipe: Look</p>
+                    <p>Double-tap painting to Examine</p>
                 </div>
             </div>
         </div>
@@ -63,9 +67,22 @@
                 <div class="ch-v"></div>
             </div>
             <div id="examine-hint" class="hidden">
-                <kbd>E</kbd>&nbsp; Examine Artwork
+                <span class="desktop-only"
+                    ><kbd>E</kbd>&nbsp; Examine Artwork</span
+                >
+                <span class="mobile-only">Double-tap to examine</span>
             </div>
             <div id="room-name">Main Gallery</div>
+
+            <!-- Mobile Controls -->
+            <div id="joystick-zone" class="mobile-only">
+                <div id="joystick-base">
+                    <div id="joystick-knob"></div>
+                </div>
+            </div>
+            <button id="gyro-btn" class="mobile-only secondary-btn">
+                Gyro: Off
+            </button>
         </div>
 
         <!-- ── Artwork Info Panel ───────────────────────────────── -->
