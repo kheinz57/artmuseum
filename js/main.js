@@ -24,6 +24,9 @@ let viewerLastY = 0;
 
 let magnifierActive = false;
 
+// Double-tap helper for mobile
+let lastTapTime = 0;
+
 /* ── Cached DOM references ─────────────────────────────── */
 const $ = (id) => document.getElementById(id);
 const loadingScreen = $("loading-screen");
@@ -142,6 +145,22 @@ async function init() {
     }
   });
 
+  // Robust mobile double-tap detection for artwork examination
+  renderer.domElement.addEventListener(
+    "touchstart",
+    (e) => {
+      if (appState !== "playing") return;
+      const now = Date.now();
+      const dt = now - lastTapTime;
+      if (dt < 350 && dt > 0) {
+        checkProximity();
+        if (nearbyArtwork) openPanel(nearbyArtwork);
+      }
+      lastTapTime = now;
+    },
+    { passive: true },
+  );
+
   imageViewer.addEventListener("wheel", onViewerWheel, { passive: false });
   imageViewer.addEventListener("pointerdown", onViewerPointerDown);
   imageViewer.addEventListener("pointermove", onViewerPointerMove);
@@ -204,6 +223,10 @@ function enterGallery() {
   console.log("Museum: Entering gallery...");
   startScreen.classList.add("hidden");
   hud.classList.remove("hidden");
+
+  const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  console.log("Museum: Touch device detected:", isTouch);
+
   appState = "playing";
   try {
     controls.lock();

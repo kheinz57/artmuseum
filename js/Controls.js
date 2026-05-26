@@ -98,16 +98,23 @@ class FirstPersonControls {
       ) {
         DeviceOrientationEvent.requestPermission()
           .then((response) => {
-            if (response === "granted") this._enableGyro();
+            if (response === "granted") {
+              this._enableGyro();
+              // Update button text manually since main.js doesn't await the promise
+              const btn = document.getElementById("gyro-btn");
+              if (btn) btn.textContent = "Gyro: On";
+            }
           })
           .catch(console.error);
+        return false;
       } else {
         this._enableGyro();
+        return true;
       }
     } else {
       this._disableGyro();
+      return false;
     }
-    return this.gyroEnabled;
   }
 
   _enableGyro() {
@@ -223,9 +230,9 @@ class FirstPersonControls {
   }
 
   _onDeviceOrientation(e) {
-    if (!this.gyroEnabled) return;
+    if (!this.gyroEnabled || e.alpha === null) return;
 
-    // Alpha (0-360) is compass direction, Beta is front-back tilt, Gamma is left-right tilt
+    // Alpha (yaw), Beta (pitch)
     const alpha = THREE.MathUtils.degToRad(e.alpha);
     const beta = THREE.MathUtils.degToRad(e.beta);
 
@@ -234,22 +241,39 @@ class FirstPersonControls {
     }
 
     this.yaw = alpha - this.gyroAlphaOffset;
-    this.pitch = beta - Math.PI / 2; // Adjust for holding phone vertically
-    this._applyLook(0, 0); // Refresh camera
+    this.pitch = beta - Math.PI / 2; // Portrait vertical hold
+
+    this._applyLook(0, 0);
   }
 
   _onTouchStart(e) {
     for (let i = 0; i < e.changedTouches.length; i++) {
       const t = e.changedTouches[i];
-      // Check if joystick zone (bottom left)
-      if (
-        t.clientX < window.innerWidth / 3 &&
-        t.clientY > window.innerHeight / 2
-      ) {
+      const joystickZone = document.getElementById("joystick-zone");
+      const rect = joystickZone ? joystickZone.getBoundingClientRect() : null;
+
+      // Detect if touch is in bottom-left region or directly on joystick
+      const isBottomLeft =
+        t.clientX < window.innerWidth / 2 && t.clientY > window.innerHeight / 2;
+      const isOnJoystick =
+        rect &&
+        t.clientX >= rect.left &&
+        t.clientX <= rect.right &&
+        t.clientY >= rect.top &&
+        t.clientY <= rect.bottom;
+
+      if (isOnJoystick || isBottomLeft) {
         this.joystickActive = true;
         this.joystickTouchId = t.identifier;
-        this.joystickOriginX = t.clientX;
-        this.joystickOriginY = t.clientY;
+
+        // Use the center of the joystick zone as origin for better accuracy
+        if (rect) {
+          this.joystickOriginX = rect.left + rect.width / 2;
+          this.joystickOriginY = rect.top + rect.height / 2;
+        } else {
+          this.joystickOriginX = t.clientX;
+          this.joystickOriginY = t.clientY;
+        }
       } else {
         this.lookTouchId = t.identifier;
         this.lastTouchX = t.clientX;
@@ -259,6 +283,7 @@ class FirstPersonControls {
   }
 
   _onTouchMove(e) {
+    if (!this.isLocked) return;
     e.preventDefault();
     for (let i = 0; i < e.changedTouches.length; i++) {
       const t = e.changedTouches[i];
@@ -266,8 +291,8 @@ class FirstPersonControls {
         const dx = t.clientX - this.joystickOriginX;
         const dy = t.clientY - this.joystickOriginY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const max = 40;
-        const strength = Math.min(dist, max) / max;
+        const maxDist = 50; // Increased distance for better precision
+        const strength = Math.min(dist, maxDist) / maxDist;
         const angle = Math.atan2(dy, dx);
 
         this.joystickVector.x = Math.cos(angle) * strength;
@@ -275,7 +300,9 @@ class FirstPersonControls {
 
         const knob = document.getElementById("joystick-knob");
         if (knob) {
-          knob.style.transform = `translate(${Math.cos(angle) * strength * 30}px, ${Math.sin(angle) * strength * 30}px)`;
+          const moveX = Math.cos(angle) * strength * 35;
+          const moveY = Math.sin(angle) * strength * 35;
+          knob.style.transform = `translate(${moveX}px, ${moveY}px)`;
         }
       } else if (t.identifier === this.lookTouchId) {
         const dx = t.clientX - this.lastTouchX;
@@ -295,6 +322,8 @@ class FirstPersonControls {
         this.joystickVector = { x: 0, y: 0 };
         const knob = document.getElementById("joystick-knob");
         if (knob) knob.style.transform = "translate(0,0)";
+      } else if (t.identifier === this.lookTouchId) {
+        this.lookTouchId = null;
       }
     }
   }

@@ -29,21 +29,19 @@ body {
     display: none !important;
 }
 
-.desktop-only {
-    display: block;
-}
-
+/* Responsive visibility utility classes */
 .mobile-only {
     display: none !important;
 }
 
-@media (pointer: coarse), (max-width: 1024px) {
+@media (max-width: 1024px), (pointer: coarse) {
     .desktop-only {
         display: none !important;
     }
     .mobile-only {
         display: block !important;
     }
+    /* Ensure secondary-btn maintains its layout if it's mobile-only */
     .mobile-only.secondary-btn {
         display: inline-block !important;
     }
@@ -307,6 +305,13 @@ body {
 }
 
 /* ── Mobile Navigation UI ────────────────────────────────── */
+#mobile-controls {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+}
+
 #joystick-zone {
     position: absolute;
     bottom: 2.5rem;

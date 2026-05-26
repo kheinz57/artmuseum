@@ -2,8 +2,11 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Virtual Art Museum</title>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+        <title>Virtual Art Museum V2</title>
         <link rel="stylesheet" href="css/style.css" />
     </head>
     <body>
@@ -74,15 +77,15 @@
             </div>
             <div id="room-name">Main Gallery</div>
 
-            <!-- Mobile Controls -->
-            <div id="joystick-zone" class="mobile-only">
-                <div id="joystick-base">
-                    <div id="joystick-knob"></div>
+            <!-- Mobile Navigation Interface -->
+            <div id="mobile-controls" class="mobile-only">
+                <div id="joystick-zone">
+                    <div id="joystick-base">
+                        <div id="joystick-knob"></div>
+                    </div>
                 </div>
+                <button id="gyro-btn" class="secondary-btn">Gyro: Off</button>
             </div>
-            <button id="gyro-btn" class="mobile-only secondary-btn">
-                Gyro: Off
-            </button>
         </div>
 
         <!-- ── Artwork Info Panel ───────────────────────────────── -->
