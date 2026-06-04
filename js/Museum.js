@@ -190,9 +190,9 @@ class Museum {
      ══════════════════════════════════════════════════════════ */
 
   _addAmbientLight() {
-    // Dimmed ambient light for a more dramatic gallery atmosphere
-    this.scene.add(new THREE.AmbientLight(0xfff8f0, 0.12));
-    this.scene.add(new THREE.HemisphereLight(0xfff5e8, 0x1c1000, 0.08));
+    // Brightened ambient lighting for better overall visibility
+    this.scene.add(new THREE.AmbientLight(0xfff8f0, 0.35));
+    this.scene.add(new THREE.HemisphereLight(0xfff5e8, 0x1c1000, 0.22));
   }
 
   /* ══════════════════════════════════════════════════════════

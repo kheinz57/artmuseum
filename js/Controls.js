@@ -142,8 +142,8 @@ class FirstPersonControls {
     let inputX = 0;
     let inputZ = 0;
 
-    if (this._keys["KeyW"] || this._keys["ArrowUp"]) inputZ -= 1;
-    if (this._keys["KeyS"] || this._keys["ArrowDown"]) inputZ += 1;
+    if (this._keys["KeyW"] || this._keys["ArrowUp"]) inputZ += 1;
+    if (this._keys["KeyS"] || this._keys["ArrowDown"]) inputZ -= 1;
     if (this._keys["KeyA"] || this._keys["ArrowLeft"]) inputX -= 1;
     if (this._keys["KeyD"] || this._keys["ArrowRight"]) inputX += 1;
 
