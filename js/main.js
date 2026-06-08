@@ -269,6 +269,7 @@ function openPanel(art) {
   $("panel-title").textContent = art.title || "Untitled";
   $("panel-artist").textContent = art.artist || "";
   $("panel-year").textContent = art.year || "";
+  $("panel-id").textContent = "[" + (art.id || "") + "]";
   $("panel-medium").textContent = art.medium || "";
 
   /* Show/hide the dot separator between year and medium */
